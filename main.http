@@ -1,0 +1,21 @@
+GET http://localhost:8080/categories
+
+POST http://localhost:8080/categories
+Content-Type: application/json
+
+{
+	"name": "Test category 1",
+	"description": "Test description 1"
+}
+
+GET http://localhost:8080/categories/1
+
+PUT http://localhost:8080/categories/1
+Content-Type: application/json
+
+{
+	"name": "Test category 1 updated",
+	"description": "Test description 1 updated"
+}
+
+DELETE http://localhost:8080/categories/1 
