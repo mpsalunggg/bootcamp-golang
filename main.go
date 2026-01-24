@@ -26,6 +26,13 @@ var categories = []Category{}
 func main() {
 	http.HandleFunc("/categories", handleCategories)
 	http.HandleFunc("/categories/", handleCategoryById)
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(Response{
+			Message: "success",
+			Data:    "OK",
+		})
+	})
 
 	fmt.Println("server is running on port " + port)
 
