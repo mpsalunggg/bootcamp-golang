@@ -1,14 +1,26 @@
 package main
 
 import (
+	"bootcamp-golang/database"
+	"bootcamp-golang/handlers"
+	"bootcamp-golang/repositories"
+	"bootcamp-golang/services"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
-const port = ":8080"
+type Config struct {
+	Port        string `mapstructure:"PORT"`
+	DatabaseURL string `mapstructure:"DATABASE_URL"`
+}
+
+// const port = ":8080"
 
 type Category struct {
 	ID          int    `json:"id"`
@@ -24,8 +36,33 @@ type Response struct {
 var categories = []Category{}
 
 func main() {
-	http.HandleFunc("/categories", handleCategories)
-	http.HandleFunc("/categories/", handleCategoryById)
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if _, err := os.Stat(".env"); err == nil {
+		viper.SetConfigFile(".env")
+		_ = viper.ReadInConfig()
+	}
+
+	config := Config{
+		Port:        viper.GetString("PORT"),
+		DatabaseURL: viper.GetString("DATABASE_URL"),
+	}
+
+	db, err := database.InitDB(config.DatabaseURL)
+	if err != nil {
+		log.Fatal("Error initializing database:", err)
+	}
+	defer db.Close()
+
+	productRepository := repositories.NewProductRepository(db)
+	productService := services.NewProductService(productRepository)
+	productHandler := handlers.NewProductHandler(productService)
+
+	http.HandleFunc("/api/produk", productHandler.HandleProduct)
+
+	// http.HandleFunc("/categories", handleCategories)
+	// http.HandleFunc("/categories/", handleCategoryById)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(Response{
@@ -34,12 +71,18 @@ func main() {
 		})
 	})
 
-	fmt.Println("server is running on port " + port)
-
-	err := http.ListenAndServe(port, nil)
+	log.Println("Server running di localhost:" + config.Port)
+	err = http.ListenAndServe(":"+config.Port, nil)
 	if err != nil {
-		fmt.Println("running server error: ", err)
+		log.Fatal("gagal running server:", err)
 	}
+
+	// fmt.Println("server is running on port " + port)
+
+	// err := http.ListenAndServe(port, nil)
+	// if err != nil {
+	// 	fmt.Println("running server error: ", err)
+	// }
 }
 
 func handleCategories(w http.ResponseWriter, r *http.Request) {
