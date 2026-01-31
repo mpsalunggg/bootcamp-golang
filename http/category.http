@@ -1,0 +1,21 @@
+GET http://localhost:8080/api/categories
+
+POST http://localhost:8080/api/categories
+Content-Type: application/json
+
+{
+	"name": "Dapur",
+	"description": "Alat dapur"
+}
+
+GET http://localhost:8080/api/categories/3
+
+PUT http://localhost:8080/api/categories/1
+Content-Type: application/json
+
+{
+	"name": "Test lagi",
+	"description": "yeyuu"
+}
+
+DELETE http://localhost:8080/api/categories/2
