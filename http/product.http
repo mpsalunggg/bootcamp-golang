@@ -1,0 +1,25 @@
+GET http://localhost:8080/api/produk
+
+POST http://localhost:8080/api/produk
+Content-Type: application/json
+
+{
+	"name": "Product 1",
+	"price": 10000,
+	"stock": 10,
+	"category_id": 1
+}
+
+GET http://localhost:8080/api/produk/7
+
+PUT http://localhost:8080/api/produk/7
+Content-Type: application/json
+
+{
+	"name": "produk 7",
+	"price": 15000,
+	"stock": 15,
+	"category_id": 2
+}
+
+DELETE http://localhost:8080/api/produk/9

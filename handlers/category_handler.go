@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func parseProductID(path string) (int, error) {
-	idStr := strings.TrimPrefix(path, "/api/produk/")
+func parseCategoryID(path string) (int, error) {
+	idStr := strings.TrimPrefix(path, "/api/categories/")
 	idStr = strings.Trim(idStr, "/")
 	if idx := strings.Index(idStr, "/"); idx > 0 {
 		idStr = idStr[:idx]
@@ -19,15 +19,15 @@ func parseProductID(path string) (int, error) {
 	return strconv.Atoi(idStr)
 }
 
-type ProductHandler struct {
-	service *services.ProductService
+type CategoryHandler struct {
+	service *services.CategoryService
 }
 
-func NewProductHandler(service *services.ProductService) *ProductHandler {
-	return &ProductHandler{service: service}
+func NewCategoryHandler(service *services.CategoryService) *CategoryHandler {
+	return &CategoryHandler{service: service}
 }
 
-func (h *ProductHandler) HandleProduct(w http.ResponseWriter, r *http.Request) {
+func (h *CategoryHandler) HandleCategory(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.GetAll(w, r)
@@ -38,7 +38,7 @@ func (h *ProductHandler) HandleProduct(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *ProductHandler) HandleProductById(w http.ResponseWriter, r *http.Request) {
+func (h *CategoryHandler) HandleCategoryById(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.GetById(w, r)
@@ -51,77 +51,73 @@ func (h *ProductHandler) HandleProductById(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	products, err := h.service.GetAll()
+func (h *CategoryHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	categories, err := h.service.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil mendapatkan semua produk", products))
+	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil mendapatkan semua kategori", categories))
 }
 
-func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var product models.Product
-	err := json.NewDecoder(r.Body).Decode(&product)
+func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
+	var category models.Category
+	err := json.NewDecoder(r.Body).Decode(&category)
 	if err != nil {
 		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
 		return
 	}
-	err = h.service.Create(&product)
+	err = h.service.Create(&category)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(utils.NewResponse("success create product", product))
+	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil membuat kategori", category))
 }
 
-func (h *ProductHandler) GetById(w http.ResponseWriter, r *http.Request) {
-	id, err := parseProductID(r.URL.Path)
+func (h *CategoryHandler) GetById(w http.ResponseWriter, r *http.Request) {
+	id, err := parseCategoryID(r.URL.Path)
 	if err != nil {
 		http.Error(w, "ID tidak valid", http.StatusBadRequest)
 		return
 	}
-	product, err := h.service.GetById(id)
+	category, err := h.service.GetById(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil mendapatkan produk berdasarkan id", product))
+	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil mendapatkan kategori berdasarkan id", category))
 }
 
-func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
-	id, err := parseProductID(r.URL.Path)
+func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := parseCategoryID(r.URL.Path)
 	if err != nil {
 		http.Error(w, "ID tidak valid", http.StatusBadRequest)
 		return
 	}
-	var product models.Product
-	err = json.NewDecoder(r.Body).Decode(&product)
+	var category models.Category
+	err = json.NewDecoder(r.Body).Decode(&category)
 	if err != nil {
 		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
 		return
 	}
-
-	product.ID = id
-	err = h.service.Update(&product)
+	category.ID = id
+	err = h.service.Update(&category)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil memperbarui produk", product))
+	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil memperbarui kategori", category))
 }
 
-func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := parseProductID(r.URL.Path)
+func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id, err := parseCategoryID(r.URL.Path)
 	if err != nil {
 		http.Error(w, "ID tidak valid", http.StatusBadRequest)
 		return
@@ -131,8 +127,7 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil menghapus produk", nil))
+	json.NewEncoder(w).Encode(utils.NewResponse("Berhasil menghapus kategori", nil))
 }
