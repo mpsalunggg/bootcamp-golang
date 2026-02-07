@@ -52,7 +52,9 @@ func (h *ProductHandler) HandleProductById(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *ProductHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	products, err := h.service.GetAll()
+	name := r.URL.Query().Get("name")
+
+	products, err := h.service.GetAll(name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
