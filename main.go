@@ -46,7 +46,9 @@ func main() {
 	categoryService := services.NewCategoryService(categoryRepository)
 	productHandler := handlers.NewProductHandler(productService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
-
+	transactionRepository := repositories.NewTransactionRepository(db)
+	transactionService := services.NewTransactionService(transactionRepository)
+	transactionHandler := handlers.NewTransactionHandler(transactionService)
 	_ = repositories.NewCategoryRepository(db)
 
 	http.HandleFunc("/api/produk", productHandler.HandleProduct)
@@ -54,6 +56,8 @@ func main() {
 
 	http.HandleFunc("/api/categories", categoryHandler.HandleCategory)
 	http.HandleFunc("/api/categories/", categoryHandler.HandleCategoryById)
+
+	http.HandleFunc("/api/checkout", transactionHandler.HandleCheckout)
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(utils.NewResponse("success", "OK"))
